@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+    <title>Crosasing Game</title>
+    <style type="text/css">
+        canvas {
+            border: 2px solid black;
+            background-color: salmon;
+        }
+    </style>
+</head>
+<body>
+<h1>CrossingGame</h1>
+        <canvas id='mycanvas' width="1000" height="500"></canvas>
+
+<script type="text/javascript">
+    const canvas = document.getElementById('mycanvas');
+    const ctx = canvas.getContext('2d');
+
+    let screenWidth = 1000;
+    let screenHeight = 500;
+
+    let enemyWidth=50;
+    let playerWidth = 50;
+
+    let isGameOver = false;
+
+    class GameCharacter {
+        constructor(x, y, width, height, color, vx, vy ) {
+            this.x = x
+            this.y = y
+            this.width = width
+            this.height = height;
+            this.color = color
+            this.vx = vx;
+            this.vy = vy;
+            this.maxVx = 4;
+        }
+        moveY() {
+            if ( this.y > screenHeight - 100 || this.y < this.width ) {
+                this.vy = -this.vy
+            }
+            this.y += this.vy;
+        }
+        moveX() {
+            if ( this.x > screenWidth - this.width || this.x < this.width ) {
+                this.vx = -this.vx
+            }
+            this.x += this.vx;
+        }
+    }
+
+    let enemies = {};
+    let player1 = {};
+    let goal = {};
+
+    let initGame = function() {
+        isGameOver = false;
+
+        enemies = [
+            new GameCharacter(200, 225, enemyWidth, enemyWidth, "rgb(0,0,255)", 2, 2),
+            new GameCharacter(450, 400, enemyWidth, enemyWidth, "rgb(0,0,255)", 2, 3),
+            new GameCharacter(700, 50, enemyWidth, enemyWidth, "rgb(0,0,255)", 2, 4)
+        ];
+
+        player1 = new GameCharacter(50, 225, playerWidth, playerWidth, "rgb(0, 255, 0", 0, 1);
+        goal = new GameCharacter(screenWidth - 75, 225, playerWidth, playerWidth, "rgb(255, 255, 0", 0, 0);
+    }
+
+    let sprites = {};
+    let loadSprites = function() {
+        sprites.player = new Image();
+        sprites.player.src = 'images/hero.png'
+
+        sprites.floor = new Image();
+        sprites.floor.src = 'images/floor.png'
+
+        sprites.enemy = new Image();
+        sprites.enemy.src = 'images/enemy.png'
+
+        sprites.goal = new Image();
+        sprites.goal.src = 'images/chest.png'
+    }
+
+    document.addEventListener('keydown', function(event) {
+        let keyPressed = event.key
+        if ( keyPressed === "ArrowRight" ) {
+            player1.vx = player1.maxVx;
+        }
+        if ( keyPressed === "ArrowLeft" ) {
+            player1.vx = -player1.maxVx;
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        player1.vx = 0;
+    });
+
+    let checkCollisions = function (r1, r2) {
+      let xHit = Math.abs(r1.x - r2.x) <= Math.max(r1.width, r2.width);
+      let yHit = Math.abs(r1.y - r2.y) <= Math.max(r1.height, r2.height);
+      return xHit && yHit;
+    }
+
+    let draw = function() {
+        ctx.clearRect(0,0,screenWidth, screenHeight);
+
+        ctx.drawImage(sprites.floor, 0, 0);
+        ctx.drawImage(sprites.player, player1.x, player1.y);
+        ctx.drawImage(sprites.goal, goal.x, goal.y);
+
+        ctx.draw
+        enemies.forEach(function(enemy) {
+            ctx.drawImage(sprites.enemy, enemy.x, enemy.y)
+        });
+    }
+
+    let update = function() {
+        enemies.forEach(function(enemy) {
+            if ( checkCollisions(player1, enemy) ) {
+                endGame("game over");
+            }
+            enemy.moveY();
+        });
+
+        if ( checkCollisions( player1, goal) ) {
+            endGame("for the win");
+        }
+        player1.moveX();
+    }
+
+    let endGame = function(text) {
+        isGameOver = true;
+        alert(text)
+  //      window.location = "";
+        initGame();
+    }
+
+    let step = function () {
+        update();
+        draw();
+        if ( isGameOver === false ) {
+            window.requestAnimationFrame(step);
+        }
+    }
+
+    initGame();
+    loadSprites();
+    step();
+    //ctx.fillStyle = 'green';
+    //ctx.fillRect(10, 10, 150, 100);
+    </script>
+</body>
+</html>
